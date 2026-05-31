@@ -1,14 +1,17 @@
 import streamlit as st
-import pandas as pd
 
+# --------------------------------------------------
 # Page Configuration
+# --------------------------------------------------
 st.set_page_config(
     page_title="Weight Conversion",
-    page_icon="⚖️",
+    page_icon="⚙️",
     layout="centered"
 )
 
+# --------------------------------------------------
 # Session State Initialization
+# --------------------------------------------------
 if "input_value" not in st.session_state:
     st.session_state.input_value = ""
 
@@ -19,14 +22,18 @@ if "results" not in st.session_state:
     st.session_state.results = None
 
 
+# --------------------------------------------------
 # Reset Function
+# --------------------------------------------------
 def reset_fields():
     st.session_state.input_value = ""
     st.session_state.input_unit = "kg"
     st.session_state.results = None
 
 
-# Conversion Factors to Newtons
+# --------------------------------------------------
+# Conversion Factors to Newton
+# --------------------------------------------------
 TO_NEWTON = {
     "kg": 9.81,
     "N": 1.0,
@@ -39,12 +46,19 @@ TO_NEWTON = {
 }
 
 
-# Title
-st.title("Weight Conversion")
+# --------------------------------------------------
+# Page Heading
+# --------------------------------------------------
+st.markdown(
+    "<h1 style='text-align:center;'>⚙️ Weight Conversion</h1>",
+    unsafe_allow_html=True
+)
 
-st.markdown("---")
+st.divider()
 
+# --------------------------------------------------
 # Input Section
+# --------------------------------------------------
 col1, col2 = st.columns([2, 1])
 
 with col1:
@@ -61,7 +75,9 @@ with col2:
         key="input_unit"
     )
 
+# --------------------------------------------------
 # Buttons
+# --------------------------------------------------
 btn1, btn2 = st.columns(2)
 
 with btn1:
@@ -71,13 +87,15 @@ with btn1:
     )
 
 with btn2:
-    reset = st.button(
+    st.button(
         "Reset",
         use_container_width=True,
         on_click=reset_fields
     )
 
+# --------------------------------------------------
 # Calculation
+# --------------------------------------------------
 if calculate:
 
     if st.session_state.input_value.strip() == "":
@@ -92,7 +110,7 @@ if calculate:
             * TO_NEWTON[st.session_state.input_unit]
         )
 
-        results = {
+        st.session_state.results = {
             "Kilogram (kg)": newton / 9.81,
             "Newton (N)": newton,
             "Kilonewton (kN)": newton / 1000,
@@ -103,37 +121,63 @@ if calculate:
             "Ton-force (tf)": newton / 9806.65
         }
 
-        st.session_state.results = results
-
     except ValueError:
         st.error("Please enter a valid numeric value.")
 
-# Display Results
+# --------------------------------------------------
+# Results
+# --------------------------------------------------
 if st.session_state.results:
 
-    st.markdown("### Conversion Results")
+    st.subheader("Conversion Results")
 
-    result_df = pd.DataFrame({
-        "Unit": [
-            "Kilogram (kg)",
-            "Newton (N)",
-            "Kilonewton (kN)",
-            "Metric Ton (t)",
-            "Pound (lb)",
-            "Kip",
-            "Kilogram-force (kgf)",
-            "Ton-force (tf)"
-        ],
-        "Value": [
-            f"{st.session_state.results['Kilogram (kg)']:,.2f}",
-            f"{st.session_state.results['Newton (N)']:,.2f}",
-            f"{st.session_state.results['Kilonewton (kN)']:,.2f}",
-            f"{st.session_state.results['Metric Ton (t)']:,.2f}",
-            f"{st.session_state.results['Pound (lb)']:,.2f}",
-            f"{st.session_state.results['Kip']:,.2f}",
-            f"{st.session_state.results['Kilogram-force (kgf)']:,.2f}",
-            f"{st.session_state.results['Ton-force (tf)']:,.2f}"
-        ]
-    })
+    html = """
+    <style>
+    .result-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 15px;
+    }
 
-    st.table(result_df)
+    .result-table th {
+        border: 1px solid #d0d0d0;
+        padding: 10px;
+        text-align: center;
+        font-weight: bold;
+        background-color: #f5f5f5;
+    }
+
+    .result-table td {
+        border: 1px solid #d0d0d0;
+        padding: 10px;
+    }
+
+    .unit-col {
+        text-align: left;
+    }
+
+    .value-col {
+        text-align: right;
+        font-family: Consolas, monospace;
+    }
+    </style>
+
+    <table class="result-table">
+        <tr>
+            <th>Unit</th>
+            <th>Value</th>
+        </tr>
+    """
+
+    for unit, value in st.session_state.results.items():
+
+        html += f"""
+        <tr>
+            <td class="unit-col">{unit}</td>
+            <td class="value-col">{value:,.2f}</td>
+        </tr>
+        """
+
+    html += "</table>"
+
+    st.markdown(html, unsafe_allow_html=True)
