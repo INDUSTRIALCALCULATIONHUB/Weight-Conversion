@@ -1,79 +1,124 @@
 import tkinter as tk
 from tkinter import messagebox
 
-def calculate():
-    try:
-        kg = kg_var.get().strip()
-        n = n_var.get().strip()
-        kn = kn_var.get().strip()
 
-        filled = sum(bool(x) for x in [kg, n, kn])
+class WeightConverter:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Weight Conversion Calculator")
+        self.root.geometry("450x250")
+        self.root.resizable(False, False)
 
-        if filled != 1:
-            messagebox.showerror(
-                "Input Error",
-                "Please enter value in only one field."
-            )
-            return
+        # Variables
+        self.kg_var = tk.StringVar()
+        self.n_var = tk.StringVar()
+        self.kn_var = tk.StringVar()
 
-        if kg:
-            kg_val = float(kg)
-            n_val = kg_val * 9.81
-            kn_val = n_val / 1000
+        # Heading
+        heading = tk.Label(
+            root,
+            text="Weight Conversion Calculator",
+            font=("Arial", 14, "bold")
+        )
+        heading.grid(row=0, column=0, columnspan=2, pady=15)
 
-        elif n:
-            n_val = float(n)
-            kg_val = n_val / 9.81
-            kn_val = n_val / 1000
-
-        elif kn:
-            kn_val = float(kn)
-            n_val = kn_val * 1000
-            kg_val = n_val / 9.81
-
-        kg_var.set(f"{kg_val:.2f}")
-        n_var.set(f"{n_val:.2f}")
-        kn_var.set(f"{kn_val:.2f}")
-
-    except ValueError:
-        messagebox.showerror(
-            "Input Error",
-            "Please enter a valid numeric value."
+        # Input Fields
+        tk.Label(root, text="Mass (kg)", font=("Arial", 11)).grid(
+            row=1, column=0, padx=10, pady=10, sticky="w"
+        )
+        tk.Entry(root, textvariable=self.kg_var, width=25).grid(
+            row=1, column=1, padx=10
         )
 
-def reset():
-    kg_var.set("")
-    n_var.set("")
-    kn_var.set("")
+        tk.Label(root, text="Force (N)", font=("Arial", 11)).grid(
+            row=2, column=0, padx=10, pady=10, sticky="w"
+        )
+        tk.Entry(root, textvariable=self.n_var, width=25).grid(
+            row=2, column=1, padx=10
+        )
 
-# Main Window
-root = tk.Tk()
-root.title("Weight Converter")
-root.geometry("350x220")
-root.resizable(False, False)
+        tk.Label(root, text="Force (kN)", font=("Arial", 11)).grid(
+            row=3, column=0, padx=10, pady=10, sticky="w"
+        )
+        tk.Entry(root, textvariable=self.kn_var, width=25).grid(
+            row=3, column=1, padx=10
+        )
 
-# Variables
-kg_var = tk.StringVar()
-n_var = tk.StringVar()
-kn_var = tk.StringVar()
+        # Buttons
+        tk.Button(
+            root,
+            text="Calculate",
+            width=15,
+            command=self.calculate,
+            bg="lightgreen"
+        ).grid(row=4, column=0, pady=20)
 
-# Labels and Entries
-tk.Label(root, text="Kg", font=("Arial", 11)).grid(row=0, column=0, padx=10, pady=10)
-tk.Entry(root, textvariable=kg_var, width=20).grid(row=0, column=1)
+        tk.Button(
+            root,
+            text="Reset",
+            width=15,
+            command=self.reset,
+            bg="lightcoral"
+        ).grid(row=4, column=1)
 
-tk.Label(root, text="N", font=("Arial", 11)).grid(row=1, column=0, padx=10, pady=10)
-tk.Entry(root, textvariable=n_var, width=20).grid(row=1, column=1)
+    def calculate(self):
+        try:
+            kg = self.kg_var.get().strip()
+            n = self.n_var.get().strip()
+            kn = self.kn_var.get().strip()
 
-tk.Label(root, text="kN", font=("Arial", 11)).grid(row=2, column=0, padx=10, pady=10)
-tk.Entry(root, textvariable=kn_var, width=20).grid(row=2, column=1)
+            entered_fields = sum(bool(x) for x in [kg, n, kn])
 
-# Buttons
-tk.Button(root, text="Calculate", width=12, command=calculate).grid(
-    row=3, column=0, pady=20
-)
+            if entered_fields == 0:
+                messagebox.showerror(
+                    "Input Error",
+                    "Please enter a value in one field."
+                )
+                return
 
-tk.Button(root, text="Reset", width=12, command=reset).grid(
-    row=3, column=1
-)
+            if entered_fields > 1:
+                messagebox.showerror(
+                    "Input Error",
+                    "Enter value in only one field."
+                )
+                return
 
-root.mainloop()
+            # Conversion from kg
+            if kg:
+                kg_val = float(kg)
+                n_val = kg_val * 9.81
+                kn_val = n_val / 1000
+
+            # Conversion from N
+            elif n:
+                n_val = float(n)
+                kg_val = n_val / 9.81
+                kn_val = n_val / 1000
+
+            # Conversion from kN
+            elif kn:
+                kn_val = float(kn)
+                n_val = kn_val * 1000
+                kg_val = n_val / 9.81
+
+            # Display results
+            self.kg_var.set(f"{kg_val:.2f}")
+            self.n_var.set(f"{n_val:.2f}")
+            self.kn_var.set(f"{kn_val:.2f}")
+
+        except ValueError:
+            messagebox.showerror(
+                "Invalid Input",
+                "Please enter a valid numeric value."
+            )
+
+    def reset(self):
+        self.kg_var.set("")
+        self.n_var.set("")
+        self.kn_var.set("")
+
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = WeightConverter(root)
+    root.mainloop()
