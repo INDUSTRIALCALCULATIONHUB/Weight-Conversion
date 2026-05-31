@@ -1,16 +1,16 @@
 import streamlit as st
 
 # --------------------------------------------------
-# Page Configuration
+# PAGE CONFIGURATION
 # --------------------------------------------------
 st.set_page_config(
     page_title="Weight Conversion",
-    page_icon="⚙️",
+    page_icon="⚖️",
     layout="centered"
 )
 
 # --------------------------------------------------
-# Session State Initialization
+# SESSION STATE
 # --------------------------------------------------
 if "input_value" not in st.session_state:
     st.session_state.input_value = ""
@@ -23,41 +23,45 @@ if "results" not in st.session_state:
 
 
 # --------------------------------------------------
-# Reset Function
+# RESET FUNCTION
 # --------------------------------------------------
 def reset_fields():
     st.session_state.input_value = ""
     st.session_state.input_unit = "kg"
     st.session_state.results = None
+    st.rerun()
 
 
 # --------------------------------------------------
-# Conversion Factors to Newton
+# CONVERSION FACTORS TO NEWTON
 # --------------------------------------------------
 TO_NEWTON = {
     "kg": 9.81,
     "N": 1.0,
     "kN": 1000.0,
     "Metric Ton (t)": 9810.0,
-    "Pound (lb)": 4.448221615,
-    "Kip": 4448.221615,
-    "Kilogram-force (kgf)": 9.80665,
-    "Ton-force (tf)": 9806.65
+    "Pound (lb)": 4.44822,
+    "Kip": 4448.22,
+    "Kilogram-force (kgf)": 9.81,
+    "Ton-force (tf)": 9810.0
 }
 
-
 # --------------------------------------------------
-# Page Heading
+# PAGE TITLE
 # --------------------------------------------------
 st.markdown(
-    "<h1 style='text-align:center;'>⚙️ Weight Conversion</h1>",
+    """
+    <h1 style='text-align:center;'>
+        ⚖️ Weight Conversion
+    </h1>
+    """,
     unsafe_allow_html=True
 )
 
 st.divider()
 
 # --------------------------------------------------
-# Input Section
+# INPUT SECTION
 # --------------------------------------------------
 col1, col2 = st.columns([2, 1])
 
@@ -71,12 +75,12 @@ with col1:
 with col2:
     st.selectbox(
         "Unit",
-        list(TO_NEWTON.keys()),
+        options=list(TO_NEWTON.keys()),
         key="input_unit"
     )
 
 # --------------------------------------------------
-# Buttons
+# BUTTONS
 # --------------------------------------------------
 btn1, btn2 = st.columns(2)
 
@@ -94,7 +98,7 @@ with btn2:
     )
 
 # --------------------------------------------------
-# Calculation
+# CALCULATION
 # --------------------------------------------------
 if calculate:
 
@@ -115,57 +119,47 @@ if calculate:
             "Newton (N)": newton,
             "Kilonewton (kN)": newton / 1000,
             "Metric Ton (t)": newton / 9810,
-            "Pound (lb)": newton / 4.448221615,
-            "Kip": newton / 4448.221615,
-            "Kilogram-force (kgf)": newton / 9.80665,
-            "Ton-force (tf)": newton / 9806.65
+            "Pound (lb)": newton / 4.44822,
+            "Kip": newton / 4448.22,
+            "Kilogram-force (kgf)": newton / 9.81,
+            "Ton-force (tf)": newton / 9810
         }
 
     except ValueError:
         st.error("Please enter a valid numeric value.")
 
 # --------------------------------------------------
-# Results
+# RESULTS
 # --------------------------------------------------
 if st.session_state.results:
 
     st.subheader("Conversion Results")
 
     html = """
-    <style>
-    .result-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 15px;
-    }
-
-    .result-table th {
-        border: 1px solid #d0d0d0;
-        padding: 10px;
-        text-align: center;
-        font-weight: bold;
-        background-color: #f5f5f5;
-    }
-
-    .result-table td {
-        border: 1px solid #d0d0d0;
-        padding: 10px;
-    }
-
-    .unit-col {
-        text-align: left;
-    }
-
-    .value-col {
-        text-align: right;
-        font-family: Consolas, monospace;
-    }
-    </style>
-
-    <table class="result-table">
+    <table style="
+        width:100%;
+        border-collapse:collapse;
+        font-family:Arial, sans-serif;
+        font-size:15px;
+    ">
         <tr>
-            <th>Unit</th>
-            <th>Value</th>
+            <th style="
+                border:1px solid #d0d0d0;
+                padding:10px;
+                text-align:center;
+                background-color:#f2f2f2;
+            ">
+                Unit
+            </th>
+
+            <th style="
+                border:1px solid #d0d0d0;
+                padding:10px;
+                text-align:center;
+                background-color:#f2f2f2;
+            ">
+                Value
+            </th>
         </tr>
     """
 
@@ -173,8 +167,22 @@ if st.session_state.results:
 
         html += f"""
         <tr>
-            <td class="unit-col">{unit}</td>
-            <td class="value-col">{value:,.2f}</td>
+            <td style="
+                border:1px solid #d0d0d0;
+                padding:8px 12px;
+                text-align:left;
+            ">
+                {unit}
+            </td>
+
+            <td style="
+                border:1px solid #d0d0d0;
+                padding:8px 12px;
+                text-align:right;
+                font-family:Consolas, monospace;
+            ">
+                {value:,.2f}
+            </td>
         </tr>
         """
 
