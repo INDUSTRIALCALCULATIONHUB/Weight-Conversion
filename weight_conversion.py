@@ -1,47 +1,129 @@
 import streamlit as st
+import pandas as pd
 
-st.set_page_config(page_title="Weight Conversion", page_icon="⚖️")
+st.set_page_config(
+    page_title="Weight Conversion Calculator",
+    page_icon="⚖️",
+    layout="centered"
+)
+
+# Initialize session state
+if "input_value" not in st.session_state:
+    st.session_state.input_value = 0.0
+
+if "input_unit" not in st.session_state:
+    st.session_state.input_unit = "kg"
+
+if "results" not in st.session_state:
+    st.session_state.results = None
+
+
+def reset_fields():
+    st.session_state.input_value = 0.0
+    st.session_state.input_unit = "kg"
+    st.session_state.results = None
+
 
 st.title("⚖️ Weight Conversion Calculator")
 
-st.write("Convert between Mass (kg), Force (N), and Force (kN)")
+st.markdown(
+    "Convert between **kg, N, kN, Metric Ton, lb, kip, kgf and tf**"
+)
 
-kg = st.text_input("Mass (kg)")
-n = st.text_input("Force (N)")
-kn = st.text_input("Force (kN)")
+# Conversion factors to Newtons
+to_newton = {
+    "kg": 9.81,
+    "N": 1.0,
+    "kN": 1000.0,
+    "Metric Ton": 9810.0,
+    "lb": 4.448221615,
+    "kip": 4448.221615,
+    "kgf": 9.80665,
+    "tf": 9806.65
+}
 
-if st.button("Calculate"):
-    filled = sum(bool(x.strip()) for x in [kg, n, kn])
+col1, col2 = st.columns(2)
 
-    if filled == 0:
-        st.error("Please enter a value in one field.")
-    elif filled > 1:
-        st.error("Please enter a value in only one field.")
-    else:
-        try:
-            if kg:
-                kg_val = float(kg)
-                n_val = kg_val * 9.81
-                kn_val = n_val / 1000
+with col1:
+    input_value = st.number_input(
+        "Enter Value",
+        min_value=0.0,
+        format="%.6f",
+        key="input_value"
+    )
 
-            elif n:
-                n_val = float(n)
-                kg_val = n_val / 9.81
-                kn_val = n_val / 1000
+with col2:
+    input_unit = st.selectbox(
+        "Input Unit",
+        list(to_newton.keys()),
+        key="input_unit"
+    )
 
-            elif kn:
-                kn_val = float(kn)
-                n_val = kn_val * 1000
-                kg_val = n_val / 9.81
+col1, col2 = st.columns(2)
 
-            st.success("Conversion Results")
+with col1:
+    calculate = st.button("Calculate", use_container_width=True)
 
-            st.write(f"**Mass (kg):** {kg_val:.2f}")
-            st.write(f"**Force (N):** {n_val:.2f}")
-            st.write(f"**Force (kN):** {kn_val:.2f}")
+with col2:
+    reset = st.button(
+        "Reset",
+        use_container_width=True,
+        on_click=reset_fields
+    )
 
-        except ValueError:
-            st.error("Please enter a valid numeric value.")
+if calculate:
 
-if st.button("Reset"):
-    st.rerun()
+    # Convert input to Newton
+    newton = input_value * to_newton[input_unit]
+
+    results = {
+        "kg": newton / 9.81,
+        "N": newton,
+        "kN": newton / 1000,
+        "Metric Ton": newton / 9810,
+        "lb": newton / 4.448221615,
+        "kip": newton / 4448.221615,
+        "kgf": newton / 9.80665,
+        "tf": newton / 9806.65
+    }
+
+    st.session_state.results = results
+
+if st.session_state.results:
+
+    st.subheader("Conversion Results")
+
+    df = pd.DataFrame(
+        {
+            "Unit": st.session_state.results.keys(),
+            "Value": [
+                round(v, 6)
+                for v in st.session_state.results.values()
+            ]
+        }
+    )
+
+    st.dataframe(
+        df,
+        use_container_width=True,
+        hide_index=True
+    )
+
+    st.success("Calculation completed successfully.")
+
+st.markdown("---")
+
+st.markdown(
+    """
+    **Units Included**
+    
+    - kg : Kilogram
+    - N : Newton
+    - kN : Kilonewton
+    - Metric Ton : Tonne
+    - lb : Pound
+    - kip : Kilopound
+    - kgf : Kilogram-force
+    - tf : Ton-force
+    """
+)
