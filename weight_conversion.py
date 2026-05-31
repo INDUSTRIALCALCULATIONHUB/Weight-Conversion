@@ -1,4 +1,5 @@
 import streamlit as st
+import pandas as pd
 
 # --------------------------------------------------
 # PAGE CONFIGURATION
@@ -29,11 +30,10 @@ def reset_fields():
     st.session_state.input_value = ""
     st.session_state.input_unit = "kg"
     st.session_state.results = None
-    st.rerun()
 
 
 # --------------------------------------------------
-# CONVERSION FACTORS TO NEWTON
+# CONVERSION FACTORS
 # --------------------------------------------------
 TO_NEWTON = {
     "kg": 9.81,
@@ -47,14 +47,10 @@ TO_NEWTON = {
 }
 
 # --------------------------------------------------
-# PAGE TITLE
+# TITLE
 # --------------------------------------------------
 st.markdown(
-    """
-    <h1 style='text-align:center;'>
-        ⚖️ Weight Conversion
-    </h1>
-    """,
+    "<h1 style='text-align:center;'>⚖️ Weight Conversion</h1>",
     unsafe_allow_html=True
 )
 
@@ -75,7 +71,7 @@ with col1:
 with col2:
     st.selectbox(
         "Unit",
-        options=list(TO_NEWTON.keys()),
+        list(TO_NEWTON.keys()),
         key="input_unit"
     )
 
@@ -102,11 +98,12 @@ with btn2:
 # --------------------------------------------------
 if calculate:
 
-    if st.session_state.input_value.strip() == "":
-        st.error("Please enter a value.")
-        st.stop()
-
     try:
+
+        if st.session_state.input_value.strip() == "":
+            st.error("Please enter a value.")
+            st.stop()
+
         value = float(st.session_state.input_value)
 
         newton = (
@@ -135,57 +132,16 @@ if st.session_state.results:
 
     st.subheader("Conversion Results")
 
-    html = """
-    <table style="
-        width:100%;
-        border-collapse:collapse;
-        font-family:Arial, sans-serif;
-        font-size:15px;
-    ">
-        <tr>
-            <th style="
-                border:1px solid #d0d0d0;
-                padding:10px;
-                text-align:center;
-                background-color:#f2f2f2;
-            ">
-                Unit
-            </th>
+    df = pd.DataFrame({
+        "Unit": list(st.session_state.results.keys()),
+        "Value": [
+            f"{v:,.2f}"
+            for v in st.session_state.results.values()
+        ]
+    })
 
-            <th style="
-                border:1px solid #d0d0d0;
-                padding:10px;
-                text-align:center;
-                background-color:#f2f2f2;
-            ">
-                Value
-            </th>
-        </tr>
-    """
-
-    for unit, value in st.session_state.results.items():
-
-        html += f"""
-        <tr>
-            <td style="
-                border:1px solid #d0d0d0;
-                padding:8px 12px;
-                text-align:left;
-            ">
-                {unit}
-            </td>
-
-            <td style="
-                border:1px solid #d0d0d0;
-                padding:8px 12px;
-                text-align:right;
-                font-family:Consolas, monospace;
-            ">
-                {value:,.2f}
-            </td>
-        </tr>
-        """
-
-    html += "</table>"
-
-    st.markdown(html, unsafe_allow_html=True)
+    st.dataframe(
+        df,
+        use_container_width=True,
+        hide_index=True
+    )
